@@ -4,6 +4,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@theme {
+  --font-display: "Playfair Display", serif;
+  --font-body: "Jost", sans-serif;
+}
+
 /*
  * Design system definition.
  *
@@ -63,25 +68,39 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  /* A.Rai brand tokens (oklch equivalents of #f5f0e8, #2a2118, #c8864a, etc.) */
+  --background: oklch(0.952 0.013 80);          /* #f5f0e8 warm off-white */
+  --foreground: oklch(0.18 0.018 60);           /* #1a1208 deep brown text */
+  --bg-warm: oklch(0.952 0.013 80);
+  --bg-dark: oklch(0.235 0.022 55);             /* #2a2118 */
+  --bg-dark-2: oklch(0.29 0.03 55);             /* #3d2e1e */
+  --accent-amber: oklch(0.66 0.13 55);          /* #c8864a */
+  --accent-amber-hover: oklch(0.6 0.13 50);
+  --text-muted-warm: oklch(0.55 0.025 70);
+  --text-light: oklch(0.952 0.013 80);
+  --card-warm: oklch(1 0 0);
+  --card-warm-border: oklch(0.9 0.015 75);
+  --nav-bg: oklch(0.952 0.013 80 / 0.97);
+  --footer-bg: oklch(0.235 0.022 55);
+  --faq-bg: oklch(0.9 0.025 70);                /* #e8ddd0 */
+  --input-border: oklch(0.78 0.02 70);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.18 0.018 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.18 0.018 60);
+  --primary: oklch(0.66 0.13 55);
+  --primary-foreground: oklch(0.99 0.005 80);
+  --secondary: oklch(0.9 0.025 70);
+  --secondary-foreground: oklch(0.18 0.018 60);
+  --muted: oklch(0.9 0.025 70);
+  --muted-foreground: oklch(0.55 0.025 70);
+  --accent: oklch(0.66 0.13 55);
+  --accent-foreground: oklch(0.99 0.005 80);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0.9 0.015 75);
+  --input: oklch(0.78 0.02 70);
+  --ring: oklch(0.66 0.13 55);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
