@@ -1,26 +1,45 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Navbar } from "@/components/site/Navbar";
+import { Hero } from "@/components/site/Hero";
+import { ProductsSection } from "@/components/site/ProductsSection";
+import { AboutSection } from "@/components/site/AboutSection";
+import { OurRange } from "@/components/site/OurRange";
+import { FAQ } from "@/components/site/FAQ";
+import { ContactSection } from "@/components/site/ContactSection";
+import { Newsletter } from "@/components/site/Newsletter";
+import { Footer } from "@/components/site/Footer";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "A.Rai — Artisans Market | Handcrafted with Care" },
+      {
+        name: "description",
+        content:
+          "Discover handcrafted products that tell stories of tradition, skill and passion. Shop wallhangings, pottery, paintings and more from Artisans Market.",
+      },
+      { property: "og:title", content: "A.Rai — Artisans Market" },
+      {
+        property: "og:description",
+        content: "Handcrafted products with heart. Crafted with care by talented artisans.",
+      },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
 function Index() {
-  return <PlaceholderIndex />;
+  return (
+    <main className="min-h-screen bg-bg-warm">
+      <Navbar />
+      <Hero />
+      <ProductsSection />
+      <AboutSection />
+      <OurRange />
+      <FAQ />
+      <ContactSection />
+      <Newsletter />
+      <Footer />
+    </main>
+  );
 }
