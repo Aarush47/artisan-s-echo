@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { ClerkProvider } from "@clerk/react";
+import { useSupabaseConnection } from "@/hooks/useSupabaseConnection";
 
 import appCss from "../styles.css?url";
 
@@ -68,7 +69,24 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
-      <Outlet />
+      <SupabaseProvider>
+        <Outlet />
+      </SupabaseProvider>
     </ClerkProvider>
   );
+}
+
+function SupabaseProvider({ children }: { children: React.ReactNode }) {
+  const { connected, error, loading } = useSupabaseConnection();
+
+  // Log connection status in development
+  if (!loading) {
+    if (connected) {
+      console.log("✅ Supabase database connected successfully");
+    } else {
+      console.error("❌ Supabase connection failed:", error);
+    }
+  }
+
+  return <>{children}</>;
 }
