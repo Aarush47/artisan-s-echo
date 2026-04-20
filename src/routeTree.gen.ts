@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MarketplaceMyListingsRouteImport } from './routes/marketplace/my-listings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketplaceMyListingsRoute = MarketplaceMyListingsRouteImport.update({
+  id: '/marketplace/my-listings',
+  path: '/marketplace/my-listings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/marketplace/my-listings': typeof MarketplaceMyListingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/marketplace/my-listings': typeof MarketplaceMyListingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/marketplace/my-listings': typeof MarketplaceMyListingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/marketplace/my-listings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/marketplace/my-listings'
+  id: '__root__' | '/' | '/marketplace/my-listings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  MarketplaceMyListingsRoute: typeof MarketplaceMyListingsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/marketplace/my-listings': {
+      id: '/marketplace/my-listings'
+      path: '/marketplace/my-listings'
+      fullPath: '/marketplace/my-listings'
+      preLoaderRoute: typeof MarketplaceMyListingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  MarketplaceMyListingsRoute: MarketplaceMyListingsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,13 +1,9 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "@/utils/animations";
 import heroBg from "@/assets/hero-bg.jpg";
-import wallhanging from "@/assets/product-wallhanging.jpg";
-import craftsman from "@/assets/hero-craftsman.jpg";
 
 export function Hero() {
   const textRef = useRef<HTMLDivElement>(null);
-  const card1Ref = useRef<HTMLDivElement>(null);
-  const card2Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const tl = gsap.timeline();
@@ -19,13 +15,6 @@ export function Hero() {
         stagger: 0.15,
         ease: "power3.out",
       });
-    }
-    if (card1Ref.current && card2Ref.current) {
-      tl.from(
-        [card1Ref.current, card2Ref.current],
-        { rotation: 0, opacity: 0, y: 30, duration: 1.2, stagger: 0.2, ease: "power3.out" },
-        "-=0.6",
-      );
     }
   }, []);
 
@@ -65,23 +54,6 @@ export function Hero() {
         <button className="mt-5 sm:mt-7 bg-accent-amber hover:bg-accent-amber-hover text-white px-6 sm:px-7 py-2.5 sm:py-3 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5">
           Shop Now
         </button>
-      </div>
-
-      <div className="hidden lg:block absolute right-6 xl:right-12 2xl:right-24 top-1/2 -translate-y-1/2">
-        <div
-          ref={card1Ref}
-          className="absolute -left-8 top-8 w-40 sm:w-44 h-52 sm:h-56 border-4 border-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
-          style={{ transform: "rotate(-5deg)" }}
-        >
-          <img src={wallhanging} alt="Feather wall hanging" className="w-full h-full object-cover" />
-        </div>
-        <div
-          ref={card2Ref}
-          className="absolute left-32 -top-4 w-36 sm:w-40 h-48 sm:h-52 border-4 border-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
-          style={{ transform: "rotate(0deg)" }}
-        >
-          <img src={craftsman} alt="Craftsman at work" className="w-full h-full object-cover" />
-        </div>
       </div>
     </section>
   );

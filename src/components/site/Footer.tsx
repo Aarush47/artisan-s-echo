@@ -19,9 +19,9 @@ export function Footer() {
       <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
         <div>
           <div className="flex items-baseline gap-2">
-            <span className="font-display font-bold text-lg text-white">A.Rai</span>
+            <span className="font-display font-bold text-lg text-white">Artisans Market</span>
             <span className="text-[10px] uppercase tracking-[0.18em] text-white/40">
-              Artisans Market
+              Handmade marketplace
             </span>
           </div>
           <p className="mt-4 text-[12px] text-white/50 leading-[1.6] max-w-[200px]">
@@ -50,8 +50,8 @@ export function Footer() {
         ))}
       </div>
       <div className="max-w-7xl mx-auto mt-10 pt-5 border-t border-white/10 flex items-center justify-between text-[11px] text-white/35">
-        <span>© 2025 by A.Rai. Handcrafted with care.</span>
-        <span className="font-display text-white/50">A.Rai</span>
+        <span>© 2025 Artisans Market. Handcrafted with care.</span>
+        <span className="font-display text-white/50">Artisans Market</span>
       </div>
     </footer>
   );

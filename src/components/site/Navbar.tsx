@@ -3,12 +3,19 @@ import { gsap } from "@/utils/animations";
 import { Menu, X } from "lucide-react";
 import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/react";
 
-const links = ["Shop All", "About", "Our Range", "Contact"];
+const links = [
+  { label: "Marketplace", href: "#marketplace" },
+  { label: "Shop All", href: "#shop-all" },
+  { label: "About", href: "#about" },
+  { label: "Our Range", href: "#our-range" },
+  { label: "Contact", href: "#contact" },
+];
 
 export function Navbar() {
   const linksRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const { isSignedIn } = useUser();
+  const navLinks = isSignedIn ? [...links, { label: "Sell Your Craft", href: "#sell" }] : links;
 
   useEffect(() => {
     if (!linksRef.current) return;
@@ -25,21 +32,21 @@ export function Navbar() {
     <header className="fixed top-0 left-0 right-0 z-50 h-[52px] bg-nav-bg backdrop-blur-md border-b border-black/10">
       <div className="h-full px-6 md:px-12 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="font-display text-lg font-bold text-foreground">A.Rai</span>
+          <span className="font-display text-lg font-bold text-foreground">Artisans Market</span>
           <span className="hidden sm:block w-px h-4 bg-foreground/30" />
           <span className="hidden sm:block text-[10px] uppercase tracking-[0.18em] text-text-muted-warm">
-            Artisans Market
+            Handmade marketplace
           </span>
         </div>
 
         <nav ref={linksRef} className="hidden md:flex items-center gap-8">
-          {links.map((l) => (
+          {navLinks.map((l) => (
             <a
-              key={l}
-              href={`#${l.toLowerCase().replace(/\s+/g, "-")}`}
+              key={l.label}
+              href={l.href}
               className="text-[11px] uppercase tracking-[0.12em] font-medium text-foreground hover:text-accent-amber transition-colors"
             >
-              {l}
+              {l.label}
             </a>
           ))}
         </nav>
@@ -77,14 +84,14 @@ export function Navbar() {
 
       {open && (
         <div className="md:hidden bg-nav-bg backdrop-blur-md border-b border-black/10 px-6 py-4 flex flex-col gap-3">
-          {links.map((l) => (
+          {navLinks.map((l) => (
             <a
-              key={l}
-              href={`#${l.toLowerCase().replace(/\s+/g, "-")}`}
+              key={l.label}
+              href={l.href}
               onClick={() => setOpen(false)}
               className="text-[11px] uppercase tracking-[0.12em] font-medium text-foreground"
             >
-              {l}
+              {l.label}
             </a>
           ))}
           <div className="flex gap-3 mt-2 flex-col sm:flex-row">

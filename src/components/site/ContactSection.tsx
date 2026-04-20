@@ -5,6 +5,13 @@ import { Phone, Mail } from "lucide-react";
 export function ContactSection() {
   const formRef = useRef<HTMLFormElement>(null);
   const [sent, setSent] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
 
   useEffect(() => {
     if (!formRef.current) return;
@@ -28,6 +35,39 @@ export function ContactSection() {
   const inputCls =
     "w-full border border-input-border px-3 py-2.5 text-[13px] focus:border-accent-amber focus:outline-none bg-white";
 
+  function handleChange(event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+  }
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const subject = `New inquiry from ${formData.firstName} ${formData.lastName}`;
+    const body = [
+      `First Name: ${formData.firstName}`,
+      `Last Name: ${formData.lastName}`,
+      `Email: ${formData.email}`,
+      `Phone: ${formData.phone || "N/A"}`,
+      "",
+      "Message:",
+      formData.message || "(No message provided)",
+    ].join("\n");
+
+    const mailtoUrl = `mailto:arpitarll28@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
+
+    setSent(true);
+    setFormData({
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      message: "",
+    });
+    setTimeout(() => setSent(false), 3000);
+  }
+
   return (
     <section id="contact" className="bg-white py-20 px-6 md:px-12">
       <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-12 max-w-6xl mx-auto">
@@ -47,32 +87,64 @@ export function ContactSection() {
 
         <form
           ref={formRef}
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSent(true);
-            setTimeout(() => setSent(false), 3000);
-          }}
+          onSubmit={handleSubmit}
           className="grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <div className="field">
             <label className={labelCls}>First Name *</label>
-            <input required className={inputCls} placeholder="Your first name" />
+            <input
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              required
+              className={inputCls}
+              placeholder="Your first name"
+            />
           </div>
           <div className="field">
             <label className={labelCls}>Last Name *</label>
-            <input required className={inputCls} placeholder="Your last name" />
+            <input
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              required
+              className={inputCls}
+              placeholder="Your last name"
+            />
           </div>
           <div className="field col-span-2">
             <label className={labelCls}>Email *</label>
-            <input required type="email" className={inputCls} placeholder="you@example.com" />
+            <input
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              type="email"
+              className={inputCls}
+              placeholder="you@example.com"
+            />
           </div>
           <div className="field col-span-2">
             <label className={labelCls}>Phone</label>
-            <input className={inputCls} placeholder="+91 00000 00000" />
+            <input
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className={inputCls}
+              placeholder="+91 00000 00000"
+            />
           </div>
           <div className="field col-span-2">
-            <label className={labelCls}>Message</label>
-            <textarea rows={4} className={inputCls} placeholder="Your message" />
+            <label className={labelCls}>Message *</label>
+            <textarea
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              rows={4}
+              required
+              className={inputCls}
+              placeholder="Your message"
+            />
           </div>
           <div className="field col-span-2">
             <button
