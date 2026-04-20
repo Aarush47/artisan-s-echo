@@ -30,7 +30,7 @@ export function ContactSection() {
 
   return (
     <section id="contact" className="bg-white py-20 px-6 md:px-12">
-      <div className="grid md:grid-cols-[2fr_3fr] gap-12 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-8 md:gap-12 max-w-6xl mx-auto">
         <div>
           <h2 className="font-display text-3xl md:text-[36px] text-foreground">Get in Touch</h2>
           <p className="mt-4 font-light text-[13px] text-text-muted-warm leading-[1.7] max-w-xs">
@@ -52,7 +52,7 @@ export function ContactSection() {
             setSent(true);
             setTimeout(() => setSent(false), 3000);
           }}
-          className="grid grid-cols-2 gap-4"
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
         >
           <div className="field">
             <label className={labelCls}>First Name *</label>

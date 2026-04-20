@@ -30,7 +30,7 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative w-full h-[600px] md:h-[640px] overflow-hidden mt-[52px]">
+    <section className="relative w-full h-[480px] sm:h-[550px] md:h-[640px] overflow-hidden mt-[52px]">
       <img
         src={heroBg}
         alt="Handcrafted wooden bowls"
@@ -48,37 +48,37 @@ export function Hero() {
 
       <div
         ref={textRef}
-        className="absolute left-6 md:left-16 bottom-16 md:bottom-24 max-w-md text-text-light"
+        className="absolute left-4 sm:left-6 md:left-16 bottom-8 sm:bottom-12 md:bottom-24 max-w-md text-text-light"
       >
-        <p className="text-[10px] uppercase tracking-[0.22em] text-white/70 mb-3">
+        <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.22em] text-white/70 mb-2 sm:mb-3">
           Handcrafted with Heart
         </p>
-        <h1 className="font-display font-bold text-5xl md:text-[64px] leading-[1.05] text-white">
+        <h1 className="font-display font-bold text-4xl sm:text-5xl md:text-[64px] leading-[1.05] text-white">
           Crafted
           <br />
           with <span className="italic text-accent-amber">Care</span>
         </h1>
-        <p className="font-body font-light text-[13px] text-white/75 leading-[1.7] mt-5 max-w-sm">
+        <p className="font-body font-light text-[12px] sm:text-[13px] text-white/75 leading-[1.7] mt-3 sm:mt-5 max-w-sm">
           Explore a world of handcrafted products that tell stories of tradition, innovation, and
           beauty. Each piece is a testament to skill, passion, and craftsmanship.
         </p>
-        <button className="mt-7 bg-accent-amber hover:bg-accent-amber-hover text-white px-7 py-3 text-[11px] uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5">
+        <button className="mt-5 sm:mt-7 bg-accent-amber hover:bg-accent-amber-hover text-white px-6 sm:px-7 py-2.5 sm:py-3 text-[10px] sm:text-[11px] uppercase tracking-[0.15em] transition-all hover:-translate-y-0.5">
           Shop Now
         </button>
       </div>
 
-      <div className="hidden md:block absolute right-12 lg:right-24 top-1/2 -translate-y-1/2">
+      <div className="hidden lg:block absolute right-6 xl:right-12 2xl:right-24 top-1/2 -translate-y-1/2">
         <div
           ref={card1Ref}
-          className="absolute -left-8 top-8 w-44 h-56 border-4 border-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
+          className="absolute -left-8 top-8 w-40 sm:w-44 h-52 sm:h-56 border-4 border-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
           style={{ transform: "rotate(-5deg)" }}
         >
           <img src={wallhanging} alt="Feather wall hanging" className="w-full h-full object-cover" />
         </div>
         <div
           ref={card2Ref}
-          className="absolute left-32 -top-4 w-40 h-52 border-4 border-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
-          style={{ transform: "rotate(4deg)" }}
+          className="absolute left-32 -top-4 w-36 sm:w-40 h-48 sm:h-52 border-4 border-white shadow-[0_8px_32px_rgba(0,0,0,0.5)] overflow-hidden"
+          style={{ transform: "rotate(0deg)" }}
         >
           <img src={craftsman} alt="Craftsman at work" className="w-full h-full object-cover" />
         </div>

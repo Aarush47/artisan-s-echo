@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/utils/animations";
 import { Menu, X } from "lucide-react";
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/react";
 
-const links = ["Shop All", "About", "Our Range", "FAQs", "Contact"];
+const links = ["Shop All", "About", "Our Range", "Contact"];
 
 export function Navbar() {
   const linksRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
     if (!linksRef.current) return;
@@ -43,9 +45,26 @@ export function Navbar() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <button className="hidden md:inline-flex items-center justify-center border border-foreground px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground hover:text-text-light transition-colors">
-            Log In
-          </button>
+          {isSignedIn ? (
+            <div className="hidden md:block">
+              <UserButton />
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:flex items-center gap-3">
+                <SignInButton mode="modal">
+                  <button className="border border-foreground px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground hover:text-text-light transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="bg-foreground text-text-light px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </div>
+            </>
+          )}
           <button
             className="md:hidden p-2"
             onClick={() => setOpen(!open)}
@@ -68,9 +87,26 @@ export function Navbar() {
               {l}
             </a>
           ))}
-          <button className="self-start border border-foreground px-4 py-1.5 text-[10px] uppercase tracking-[0.12em]">
-            Log In
-          </button>
+          <div className="flex gap-3 mt-2 flex-col sm:flex-row">
+            {isSignedIn ? (
+              <div>
+                <UserButton />
+              </div>
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <button className="flex-1 border border-foreground px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground hover:text-text-light transition-colors">
+                    Sign In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="flex-1 bg-foreground text-text-light px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </>
+            )}
+          </div>
         </div>
       )}
     </header>
