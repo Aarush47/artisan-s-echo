@@ -65,10 +65,10 @@ export function MarketplaceSection({ refreshToken }: { refreshToken: number }) {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-end justify-between gap-4 mb-8">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted-warm">
+            <p className="text-[20px] md:text-[20px] font-bold uppercase tracking-[0.2em] text-foreground">
               Marketplace
             </p>
-            <h2 className="font-display text-3xl md:text-5xl leading-[1.05] text-foreground mt-2">
+            <h2 className="font-display text-xl md:text-2xl leading-[1.15] text-foreground mt-2">
               Explore and contact sellers directly.
             </h2>
             <p className="text-sm md:text-base text-text-muted-warm mt-4 max-w-2xl leading-[1.8]">
@@ -118,6 +118,10 @@ export function MarketplaceSection({ refreshToken }: { refreshToken: number }) {
                     <h3 className="font-display text-2xl text-foreground leading-tight">{item.name}</h3>
                     <p className="text-lg font-semibold text-accent-amber">₹{Number(item.price).toFixed(2)}</p>
                   </div>
+
+                  {item.description && (
+                    <p className="text-sm leading-[1.65] text-text-muted-warm">{item.description}</p>
+                  )}
 
                   <div className="rounded-lg bg-bg-warm px-3 py-2">
                     <p className="text-[10px] uppercase tracking-[0.15em] text-text-muted-warm">

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "@/utils/animations";
-import { Menu, X } from "lucide-react";
-import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/react";
+import { LogOut, Menu, X } from "lucide-react";
+import { SignInButton, SignUpButton, UserButton, useClerk, useUser } from "@clerk/react";
+import { useAdminAccess } from "@/hooks/useAdminAccess";
+import { isAllowedAdminEmail } from "@/lib/sellerProfiles";
 
 const links = [
   { label: "Marketplace", href: "#marketplace" },
-  { label: "Shop All", href: "#shop-all" },
   { label: "About", href: "#about" },
   { label: "Our Range", href: "#our-range" },
   { label: "Contact", href: "#contact" },
@@ -14,8 +15,16 @@ const links = [
 export function Navbar() {
   const linksRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const { isSignedIn } = useUser();
-  const navLinks = isSignedIn ? [...links, { label: "Sell Your Craft", href: "#sell" }] : links;
+  const { signOut } = useClerk();
+  const { isSignedIn, user } = useUser();
+  const { isAdmin } = useAdminAccess(isSignedIn ? user?.id : undefined, user?.primaryEmailAddress?.emailAddress);
+  const navLinks = isSignedIn
+    ? [
+        ...links,
+        ...((isAdmin || isAllowedAdminEmail(user?.primaryEmailAddress?.emailAddress)) ? [{ label: "Admin Portal", href: "/admin" }] : []),
+        { label: "Sell Your Craft", href: "#sell" },
+      ]
+    : links;
 
   useEffect(() => {
     if (!linksRef.current) return;
@@ -53,8 +62,16 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           {isSignedIn ? (
-            <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-3">
               <UserButton />
+              <button
+                type="button"
+                onClick={() => signOut({ redirectUrl: "/" })}
+                className="inline-flex items-center gap-2 rounded-md border border-foreground px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] text-foreground transition-colors hover:bg-foreground hover:text-text-light"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                Logout
+              </button>
             </div>
           ) : (
             <>
@@ -64,7 +81,7 @@ export function Navbar() {
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="modal">
+                <SignUpButton mode="modal" forceRedirectUrl="/seller-onboarding">
                   <button className="bg-foreground text-text-light px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors">
                     Sign Up
                   </button>
@@ -96,8 +113,16 @@ export function Navbar() {
           ))}
           <div className="flex gap-3 mt-2 flex-col sm:flex-row">
             {isSignedIn ? (
-              <div>
+              <div className="flex flex-col gap-3">
                 <UserButton />
+                <button
+                  type="button"
+                  onClick={() => signOut({ redirectUrl: "/" })}
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-foreground px-4 py-2 text-[10px] uppercase tracking-[0.12em] text-foreground transition-colors hover:bg-foreground hover:text-text-light"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Logout
+                </button>
               </div>
             ) : (
               <>
@@ -106,7 +131,7 @@ export function Navbar() {
                     Sign In
                   </button>
                 </SignInButton>
-                <SignUpButton mode="modal">
+                <SignUpButton mode="modal" forceRedirectUrl="/seller-onboarding">
                   <button className="flex-1 bg-foreground text-text-light px-4 py-1.5 text-[10px] uppercase tracking-[0.12em] hover:bg-foreground/90 transition-colors">
                     Sign Up
                   </button>

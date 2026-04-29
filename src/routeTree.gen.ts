@@ -9,9 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SellerOnboardingRouteImport } from './routes/seller-onboarding'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MarketplaceMyListingsRouteImport } from './routes/marketplace/my-listings'
 
+const SellerOnboardingRoute = SellerOnboardingRouteImport.update({
+  id: '/seller-onboarding',
+  path: '/seller-onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -25,32 +37,59 @@ const MarketplaceMyListingsRoute = MarketplaceMyListingsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/seller-onboarding': typeof SellerOnboardingRoute
   '/marketplace/my-listings': typeof MarketplaceMyListingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/seller-onboarding': typeof SellerOnboardingRoute
   '/marketplace/my-listings': typeof MarketplaceMyListingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/seller-onboarding': typeof SellerOnboardingRoute
   '/marketplace/my-listings': typeof MarketplaceMyListingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/marketplace/my-listings'
+  fullPaths: '/' | '/admin' | '/seller-onboarding' | '/marketplace/my-listings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/marketplace/my-listings'
-  id: '__root__' | '/' | '/marketplace/my-listings'
+  to: '/' | '/admin' | '/seller-onboarding' | '/marketplace/my-listings'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/seller-onboarding'
+    | '/marketplace/my-listings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  SellerOnboardingRoute: typeof SellerOnboardingRoute
   MarketplaceMyListingsRoute: typeof MarketplaceMyListingsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/seller-onboarding': {
+      id: '/seller-onboarding'
+      path: '/seller-onboarding'
+      fullPath: '/seller-onboarding'
+      preLoaderRoute: typeof SellerOnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -70,6 +109,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  SellerOnboardingRoute: SellerOnboardingRoute,
   MarketplaceMyListingsRoute: MarketplaceMyListingsRoute,
 }
 export const routeTree = rootRouteImport

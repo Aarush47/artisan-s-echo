@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useUser, SignInButton, SignUpButton } from "@clerk/react";
 import { ImagePlus, LoaderCircle, Sparkles, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { createProductListing, deleteProductListing, type ProductListing } from "@/lib/productListings";
-
+import { getSellerProfile, type SellerProfile } from "@/lib/sellerProfiles";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 interface SellProductSectionProps {
@@ -19,11 +20,45 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [latestListing, setLatestListing] = useState<ProductListing | null>(null);
+  const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSellerProfile() {
+      if (!isSignedIn || !user) {
+        if (isMounted) {
+          setSellerProfile(null);
+          setProfileError(null);
+          setProfileLoading(false);
+        }
+        return;
+      }
+
+      setProfileLoading(true);
+      const result = await getSellerProfile(user.id);
+
+      if (!isMounted) return;
+
+      setSellerProfile(result.data);
+      setProfileError(result.error);
+      setProfileLoading(false);
+    }
+
+    loadSellerProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isSignedIn, user?.id]);
 
   const canSubmit = useMemo(() => {
     return isSignedIn && !!user && name.trim() && price.trim() && contactNumber.trim() && imageFile;
@@ -33,6 +68,7 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
     setName("");
     setPrice("");
     setContactNumber("");
+    setDescription("");
     setImageFile(null);
     setImagePreview("");
   }
@@ -74,6 +110,16 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
       return;
     }
 
+    if (!sellerProfile) {
+      toast.error("Complete your seller profile before listing products.");
+      return;
+    }
+
+    if (sellerProfile.is_blocked) {
+      toast.error("Your seller account is blocked. Please contact an admin.");
+      return;
+    }
+
     if (!canSubmit || !imageFile) {
       toast.error("Add a photo, name, price, and contact number.");
       return;
@@ -94,6 +140,7 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
         name: name.trim(),
         price: parsedPrice,
         contactNumber: contactNumber.trim(),
+        description: description.trim() || undefined,
         imageFile,
       });
 
@@ -152,8 +199,9 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
             Add a handmade product after you sign in.
           </h2>
           <p className="text-sm md:text-base text-text-muted-warm leading-[1.8]">
-            Signed-in users can list a product with a photo, name, price, and contact number.
-            The form saves directly to Supabase and keeps the experience inside the site.
+            Signed-in users can list a product with a photo, name, price, contact number, and an
+            optional description. The form saves directly to Supabase and keeps the experience
+            inside the site.
           </p>
 
           {!isSignedIn ? (
@@ -173,7 +221,7 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
                         Sign In
                       </button>
                     </SignInButton>
-                    <SignUpButton mode="modal">
+                    <SignUpButton mode="modal" forceRedirectUrl="/seller-onboarding">
                       <button className="border border-foreground px-4 py-2 text-[10px] uppercase tracking-[0.15em] hover:bg-foreground hover:text-text-light transition-colors">
                         Sign Up
                       </button>
@@ -181,6 +229,40 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
                   </div>
                 </div>
               </div>
+            </Card>
+          ) : profileLoading ? (
+            <Card className="p-6 bg-card-warm border border-card-warm-border">
+              <div className="flex items-center gap-3 text-text-muted-warm">
+                <LoaderCircle className="h-5 w-5 animate-spin text-accent-amber" />
+                Checking seller profile...
+              </div>
+            </Card>
+          ) : profileError ? (
+            <Card className="p-6 bg-card-warm border border-card-warm-border">
+              <h3 className="font-display text-xl text-foreground">Seller profile unavailable</h3>
+              <p className="mt-2 text-sm text-text-muted-warm leading-[1.7]">{profileError}</p>
+            </Card>
+          ) : !sellerProfile ? (
+            <Card className="p-6 bg-card-warm border border-card-warm-border">
+              <h3 className="font-display text-xl text-foreground">Complete your seller profile</h3>
+              <p className="mt-2 text-sm text-text-muted-warm leading-[1.7]">
+                Add your name, photo, contact number, address, and verification documents before
+                listing products.
+              </p>
+              <Button
+                type="button"
+                className="mt-5 bg-accent-amber hover:bg-accent-amber-hover text-white"
+                onClick={() => window.location.assign("/seller-onboarding")}
+              >
+                Complete Seller Profile
+              </Button>
+            </Card>
+          ) : sellerProfile.is_blocked ? (
+            <Card className="p-6 bg-card-warm border border-red-200">
+              <h3 className="font-display text-xl text-foreground">Seller account blocked</h3>
+              <p className="mt-2 text-sm text-text-muted-warm leading-[1.7]">
+                {sellerProfile.blocked_reason ?? "Your account has been blocked by an admin."}
+              </p>
             </Card>
           ) : (
             <Card className="p-6 bg-card-warm border border-card-warm-border shadow-[0_12px_40px_rgba(0,0,0,0.06)]">
@@ -228,6 +310,18 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
                       required
                     />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="product-description">Product description (optional)</Label>
+                  <Textarea
+                    id="product-description"
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Share details like size, material, finish, or care instructions"
+                    rows={4}
+                    maxLength={500}
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -297,6 +391,11 @@ export function SellProductSection({ onProductCreated }: SellProductSectionProps
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="font-display text-2xl text-foreground">{latestListing.name}</h3>
+                      {latestListing.description && (
+                        <p className="mt-1 text-sm leading-[1.6] text-text-muted-warm">
+                          {latestListing.description}
+                        </p>
+                      )}
                       <p className="mt-1 text-sm text-text-muted-warm">
                         Contact: {latestListing.contact_number}
                       </p>

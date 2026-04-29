@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger } from "@/utils/animations";
 import { Phone, Mail } from "lucide-react";
+import { getSiteSettings } from "@/lib/siteSettings";
 
 export function ContactSection() {
   const formRef = useRef<HTMLFormElement>(null);
   const [sent, setSent] = useState(false);
+  const [settings, setSettings] = useState(getSiteSettings());
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,6 +14,19 @@ export function ContactSection() {
     phone: "",
     message: "",
   });
+
+  useEffect(() => {
+    const refresh = () => {
+      setSettings(getSiteSettings());
+    };
+
+    window.addEventListener("storage", refresh);
+    window.addEventListener("site-settings-updated", refresh);
+    return () => {
+      window.removeEventListener("storage", refresh);
+      window.removeEventListener("site-settings-updated", refresh);
+    };
+  }, []);
 
   useEffect(() => {
     if (!formRef.current) return;
@@ -54,7 +69,7 @@ export function ContactSection() {
       formData.message || "(No message provided)",
     ].join("\n");
 
-    const mailtoUrl = `mailto:arpitarll28@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailtoUrl = `mailto:${settings.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoUrl;
 
     setSent(true);
@@ -78,10 +93,10 @@ export function ContactSection() {
             you promptly.
           </p>
           <div className="mt-8 flex items-center gap-2 text-[13px] text-foreground">
-            <Phone size={14} className="text-text-muted-warm" /> 7099340119
+            <Phone size={14} className="text-text-muted-warm" /> {settings.contactPhone}
           </div>
           <div className="mt-2 flex items-center gap-2 text-[13px] text-foreground">
-            <Mail size={14} className="text-text-muted-warm" /> arpitarll28@gmail.com
+            <Mail size={14} className="text-text-muted-warm" /> {settings.contactEmail}
           </div>
         </div>
 

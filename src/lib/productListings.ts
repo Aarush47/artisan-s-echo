@@ -1,10 +1,12 @@
 import { supabase } from "@/lib/supabase";
+import { getSellerProfile } from "@/lib/sellerProfiles";
 
 export interface ProductListingInput {
   sellerId: string;
   name: string;
   price: number;
   contactNumber: string;
+  description?: string;
   imageFile: File;
 }
 
@@ -14,6 +16,8 @@ export interface ProductListing {
   name: string;
   price: number;
   contact_number: string;
+  description?: string | null;
+  is_available?: boolean | null;
   image_url: string;
   created_at: string;
 }
@@ -75,6 +79,7 @@ function createLocalListing(input: ProductListingInput, imageUrl: string): Produ
     name: input.name,
     price: input.price,
     contact_number: input.contactNumber,
+    description: input.description ?? null,
     image_url: imageUrl,
     created_at: new Date().toISOString(),
   };
@@ -82,22 +87,36 @@ function createLocalListing(input: ProductListingInput, imageUrl: string): Produ
 
 export async function getProductListings() {
   try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [productsResult, sellersResult] = await Promise.all([
+      supabase.from("products").select("*").order("created_at", { ascending: false }),
+      supabase.from("seller_profiles").select("clerk_user_id, is_blocked"),
+    ]);
 
-    if (error) {
-      return { data: readLocalListings(), error: error.message };
+    if (productsResult.error) {
+      return { data: readLocalListings(), error: productsResult.error.message };
     }
 
-    const remote = (data as ProductListing[]) ?? [];
-    const local = readLocalListings();
+    const blockedSellerIds = new Set(
+      sellersResult.error
+        ? []
+        : (sellersResult.data ?? [])
+            .filter((seller) => Boolean((seller as { is_blocked?: boolean }).is_blocked))
+            .map((seller) => (seller as { clerk_user_id?: string }).clerk_user_id)
+            .filter((sellerId): sellerId is string => Boolean(sellerId)),
+    );
+
+    const remote = ((productsResult.data as ProductListing[]) ?? []).filter(
+      (listing) => !blockedSellerIds.has(listing.seller_id),
+    );
+    const local = readLocalListings().filter((listing) => !blockedSellerIds.has(listing.seller_id));
     const merged = [...local, ...remote].sort(
       (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-    return { data: merged, error: null };
+    return {
+      data: merged,
+      error: sellersResult.error ? sellersResult.error.message : null,
+    };
   } catch {
     return {
       data: readLocalListings(),
@@ -108,6 +127,20 @@ export async function getProductListings() {
 
 export async function createProductListing(input: ProductListingInput) {
   try {
+    const sellerProfileResult = await getSellerProfile(input.sellerId);
+
+    if (sellerProfileResult.error) {
+      return { data: null, error: sellerProfileResult.error };
+    }
+
+    if (!sellerProfileResult.data) {
+      return { data: null, error: "Complete your seller profile before listing products." };
+    }
+
+    if (sellerProfileResult.data.is_blocked) {
+      return { data: null, error: "Your seller account is blocked. Please contact an admin." };
+    }
+
     const imageUrl = await readFileAsDataUrl(input.imageFile);
 
     if (typeof navigator !== "undefined" && !navigator.onLine) {
@@ -129,6 +162,7 @@ export async function createProductListing(input: ProductListingInput) {
             name: input.name,
             price: input.price,
             contact_number: input.contactNumber,
+            description: input.description ?? null,
             image_url: imageUrl,
           },
         ])

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useUser } from '@clerk/react';
-import { useSellerListings } from '@/hooks/useSellerListings';
-import { useDeleteProduct } from '@/hooks/useProductMutations';
+import { useSellerListings } from '../../hooks/useSellerListings';
+import { useDeleteProduct } from '../../hooks/useProductMutations';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Loader, Trash2, Plus } from 'lucide-react';
