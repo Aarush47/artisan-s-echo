@@ -1,5 +1,5 @@
 import { r as reactExports } from "../_libs/react.mjs";
-import { f as isAdminIdentity } from "./sellerProfiles-zPqAJo-P.mjs";
+import { f as isAdminIdentity } from "./sellerProfiles-DQSvsmEI.mjs";
 function useAdminAccess(clerkUserId, email) {
   const [isAdmin, setIsAdmin] = reactExports.useState(false);
   const [loading, setLoading] = reactExports.useState(Boolean(clerkUserId));

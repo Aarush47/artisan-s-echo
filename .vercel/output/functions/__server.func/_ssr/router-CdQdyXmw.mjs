@@ -32,7 +32,7 @@ const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 async function testDatabaseConnection() {
   try {
-    const { data, error } = await supabase.from("information_schema.tables").select("table_name").limit(1);
+    const { data, error } = await supabase.from("products").select("id").limit(1);
     if (error) {
       console.error("Database connection error:", error);
       return { success: false, error: error.message };
@@ -157,7 +157,7 @@ function SupabaseProvider({ children }) {
   }
   return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children });
 }
-const $$splitComponentImporter$3 = () => import("./seller-onboarding-DVeq9yh0.mjs");
+const $$splitComponentImporter$3 = () => import("./seller-onboarding-Ck5TEvO5.mjs");
 const Route$3 = createFileRoute("/seller-onboarding")({
   head: () => ({
     meta: [{
@@ -169,7 +169,7 @@ const Route$3 = createFileRoute("/seller-onboarding")({
   }),
   component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-const $$splitComponentImporter$2 = () => import("./admin-BO4itlkw.mjs");
+const $$splitComponentImporter$2 = () => import("./admin-DNJ3Ecez.mjs");
 const Route$2 = createFileRoute("/admin")({
   head: () => ({
     meta: [{
@@ -181,7 +181,7 @@ const Route$2 = createFileRoute("/admin")({
   }),
   component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-const $$splitComponentImporter$1 = () => import("./index-35O1r7f3.mjs");
+const $$splitComponentImporter$1 = () => import("./index-NVwtd2C7.mjs");
 const Route$1 = createFileRoute("/")({
   head: () => ({
     meta: [{
@@ -199,7 +199,7 @@ const Route$1 = createFileRoute("/")({
   }),
   component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-const $$splitComponentImporter = () => import("./my-listings-BQ79vY8J.mjs");
+const $$splitComponentImporter = () => import("./my-listings-Bwocpvg9.mjs");
 const Route = createFileRoute("/marketplace/my-listings")({
   head: () => ({
     meta: [{

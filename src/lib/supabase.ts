@@ -17,8 +17,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export async function testDatabaseConnection() {
   try {
     const { data, error } = await supabase
-      .from('information_schema.tables')
-      .select('table_name')
+      .from('products')
+      .select('id')
       .limit(1);
 
     if (error) {
