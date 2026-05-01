@@ -3,7 +3,7 @@ import { S as Slot } from "../_libs/radix-ui__react-slot.mjs";
 import { c as cva } from "../_libs/class-variance-authority.mjs";
 import { c as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
-import { s as supabase } from "./router-DkzG_Dwk.mjs";
+import { s as supabase } from "./router-VTNU8hFh.mjs";
 function cn(...inputs) {
   return twMerge(clsx(inputs));
 }

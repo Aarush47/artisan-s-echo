@@ -104,14 +104,20 @@ function AdminPortalPage() {
   }
 
   async function loadPortalData() {
-    const [sellerResult, productResult] = await Promise.all([
-      getSellerProfilesWithCounts(),
-      getProductListings(),
-    ]);
+    try {
+      const [sellerResult, productResult] = await Promise.all([
+        getSellerProfilesWithCounts(),
+        getProductListings(),
+      ]);
 
-    setSellers(sellerResult.data ?? []);
-    setProducts(productResult.data ?? []);
-    setPageError(sellerResult.error ?? productResult.error);
+      setSellers(sellerResult.data ?? []);
+      setProducts(productResult.data ?? []);
+      setPageError(sellerResult.error ?? productResult.error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setPageError(`Failed to load admin data: ${errorMessage}`);
+      console.error("Admin data load error:", error);
+    }
   }
 
   useEffect(() => {

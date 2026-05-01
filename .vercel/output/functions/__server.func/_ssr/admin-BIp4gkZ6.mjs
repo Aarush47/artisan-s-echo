@@ -2,10 +2,10 @@ import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { d as useNavigate } from "../_libs/tanstack__react-router.mjs";
 import "../_libs/clerk__react.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { C as Card, B as Button, c as createSellerProfilePlaceholder, a as updateSellerVerificationStatus, b as blockSellerProfile, p as promoteSellerProfileToAdmin, d as getSellerProfilesWithCounts } from "./sellerProfiles-DEIg_NqB.mjs";
-import { I as Input, T as Textarea } from "./textarea-Cvkv0hm0.mjs";
-import { u as useAdminAccess, g as getSiteSettings, s as saveSiteSettings } from "./siteSettings-QC2hHKUO.mjs";
-import { d as deleteProductListing, g as getProductListings } from "./productListings-Cm6pTa2-.mjs";
+import { C as Card, B as Button, c as createSellerProfilePlaceholder, a as updateSellerVerificationStatus, b as blockSellerProfile, p as promoteSellerProfileToAdmin, d as getSellerProfilesWithCounts } from "./sellerProfiles-BBPVzNtq.mjs";
+import { I as Input, T as Textarea } from "./textarea-CLAGzfBk.mjs";
+import { u as useAdminAccess, g as getSiteSettings, s as saveSiteSettings } from "./siteSettings-BluNv-bU.mjs";
+import { d as deleteProductListing, g as getProductListings } from "./productListings-D-mtCgO4.mjs";
 import { p as useClerk, o as useUser } from "../_libs/clerk__shared.mjs";
 import { C as Crown, a as UserCog, b as Ban, S as Store, L as LoaderCircle, T as TriangleAlert, c as LayoutDashboard, d as Settings, e as Logs, f as LogOut, B as BadgeCheck, g as CircleX, h as ShieldCheck, P as Phone } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";
@@ -27,7 +27,7 @@ import "../_libs/radix-ui__react-compose-refs.mjs";
 import "../_libs/class-variance-authority.mjs";
 import "../_libs/clsx.mjs";
 import "../_libs/tailwind-merge.mjs";
-import "./router-DkzG_Dwk.mjs";
+import "./router-VTNU8hFh.mjs";
 import "../_libs/supabase__supabase-js.mjs";
 import "../_libs/supabase__postgrest-js.mjs";
 import "../_libs/supabase__realtime-js.mjs";
@@ -87,10 +87,16 @@ function AdminPortalPage() {
     setAuditEvents(next);
   }
   async function loadPortalData() {
-    const [sellerResult, productResult] = await Promise.all([getSellerProfilesWithCounts(), getProductListings()]);
-    setSellers(sellerResult.data ?? []);
-    setProducts(productResult.data ?? []);
-    setPageError(sellerResult.error ?? productResult.error);
+    try {
+      const [sellerResult, productResult] = await Promise.all([getSellerProfilesWithCounts(), getProductListings()]);
+      setSellers(sellerResult.data ?? []);
+      setProducts(productResult.data ?? []);
+      setPageError(sellerResult.error ?? productResult.error);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setPageError(`Failed to load admin data: ${errorMessage}`);
+      console.error("Admin data load error:", error);
+    }
   }
   reactExports.useEffect(() => {
     let isMounted = true;
