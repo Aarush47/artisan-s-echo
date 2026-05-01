@@ -54,6 +54,10 @@ export interface AdminUserRecord {
   created_at: string;
 }
 
+function toErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -73,71 +77,83 @@ export function readFileAsDataUrl(file: File) {
 }
 
 export async function getSellerProfile(clerkUserId: string) {
-  if (!clerkUserId) {
-    return { data: null, error: "Missing seller identity." };
+  try {
+    if (!clerkUserId) {
+      return { data: null, error: "Missing seller identity." };
+    }
+
+    const { data, error } = await supabase
+      .from("seller_profiles")
+      .select("*")
+      .eq("clerk_user_id", clerkUserId)
+      .maybeSingle();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: (data as SellerProfile | null) ?? null, error: null };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
   }
-
-  const { data, error } = await supabase
-    .from("seller_profiles")
-    .select("*")
-    .eq("clerk_user_id", clerkUserId)
-    .maybeSingle();
-
-  if (error) {
-    return { data: null, error: error.message };
-  }
-
-  return { data: (data as SellerProfile | null) ?? null, error: null };
 }
 
 export async function upsertSellerProfile(input: SellerProfileInput) {
-  const existingProfileResult = await getSellerProfile(input.clerkUserId);
-  const existingProfile = existingProfileResult.data;
+  try {
+    const existingProfileResult = await getSellerProfile(input.clerkUserId);
+    const existingProfile = existingProfileResult.data;
 
-  const payload = {
-    clerk_user_id: input.clerkUserId,
-    full_name: input.fullName,
-    phone_number: input.phoneNumber,
-    address: input.address,
-    government_id_type: input.governmentIdType,
-    government_id_number: input.governmentIdNumber,
-    profile_photo_url: input.profilePhotoUrl ?? null,
-    government_id_url: input.governmentIdUrl ?? null,
-    role: existingProfile?.role ?? "seller",
-    verification_status: existingProfile?.verification_status ?? "pending",
-    is_blocked: existingProfile?.is_blocked ?? false,
-    blocked_reason: existingProfile?.blocked_reason ?? null,
-    blocked_at: existingProfile?.blocked_at ?? null,
-    blocked_by_admin_id: existingProfile?.blocked_by_admin_id ?? null,
-  };
+    const payload = {
+      clerk_user_id: input.clerkUserId,
+      full_name: input.fullName,
+      phone_number: input.phoneNumber,
+      address: input.address,
+      government_id_type: input.governmentIdType,
+      government_id_number: input.governmentIdNumber,
+      profile_photo_url: input.profilePhotoUrl ?? null,
+      government_id_url: input.governmentIdUrl ?? null,
+      role: existingProfile?.role ?? "seller",
+      verification_status: existingProfile?.verification_status ?? "pending",
+      is_blocked: existingProfile?.is_blocked ?? false,
+      blocked_reason: existingProfile?.blocked_reason ?? null,
+      blocked_at: existingProfile?.blocked_at ?? null,
+      blocked_by_admin_id: existingProfile?.blocked_by_admin_id ?? null,
+    };
 
-  const { data, error } = await supabase
-    .from("seller_profiles")
-    .upsert(payload, { onConflict: "clerk_user_id" })
-    .select("*")
-    .single();
+    const { data, error } = await supabase
+      .from("seller_profiles")
+      .upsert(payload, { onConflict: "clerk_user_id" })
+      .select("*")
+      .single();
 
-  if (error) {
-    return { data: null, error: error.message };
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as SellerProfile, error: null };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
   }
-
-  return { data: data as SellerProfile, error: null };
 }
 
 export async function isAdminUser(clerkUserId: string) {
-  if (!clerkUserId) return false;
+  try {
+    if (!clerkUserId) return false;
 
-  const { data, error } = await supabase
-    .from("admins")
-    .select("id")
-    .eq("clerk_user_id", clerkUserId)
-    .maybeSingle();
+    const { data, error } = await supabase
+      .from("admins")
+      .select("id")
+      .eq("clerk_user_id", clerkUserId)
+      .maybeSingle();
 
-  if (error || !data) {
+    if (error || !data) {
+      return false;
+    }
+
+    return true;
+  } catch {
     return false;
   }
-
-  return true;
 }
 
 export async function isAdminIdentity(clerkUserId?: string, email?: string | null) {
@@ -153,94 +169,102 @@ export async function isAdminIdentity(clerkUserId?: string, email?: string | nul
 }
 
 export async function getSellerProfilesWithCounts() {
-  const [profilesResult, productsResult] = await Promise.all([
-    supabase.from("seller_profiles").select("*").order("created_at", { ascending: false }),
-    supabase.from("products").select("seller_id, contact_number"),
-  ]);
+  try {
+    const [profilesResult, productsResult] = await Promise.all([
+      supabase.from("seller_profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("products").select("seller_id, contact_number"),
+    ]);
 
-  if (profilesResult.error) {
-    return { data: null, error: profilesResult.error.message };
-  }
-
-  const counts = new Map<string, number>();
-  const latestContact = new Map<string, string>();
-  for (const row of productsResult.data ?? []) {
-    const sellerId = (row as { seller_id?: string }).seller_id;
-    if (!sellerId) continue;
-    counts.set(sellerId, (counts.get(sellerId) ?? 0) + 1);
-    const contact = (row as { contact_number?: string }).contact_number;
-    if (contact && !latestContact.has(sellerId)) {
-      latestContact.set(sellerId, contact);
+    if (profilesResult.error) {
+      return { data: null, error: profilesResult.error.message };
     }
-  }
 
-  const profiles = (profilesResult.data as SellerProfile[]) ?? [];
-  const data: SellerProfileWithCount[] = profiles.map((profile) => ({
-    ...profile,
-    product_count: counts.get(profile.clerk_user_id) ?? 0,
-    has_profile: true,
-    latest_contact_number: latestContact.get(profile.clerk_user_id) ?? null,
-  }));
+    const counts = new Map<string, number>();
+    const latestContact = new Map<string, string>();
+    for (const row of productsResult.data ?? []) {
+      const sellerId = (row as { seller_id?: string }).seller_id;
+      if (!sellerId) continue;
+      counts.set(sellerId, (counts.get(sellerId) ?? 0) + 1);
+      const contact = (row as { contact_number?: string }).contact_number;
+      if (contact && !latestContact.has(sellerId)) {
+        latestContact.set(sellerId, contact);
+      }
+    }
 
-  const profileIds = new Set(profiles.map((profile) => profile.clerk_user_id));
-  for (const [sellerId, count] of counts.entries()) {
-    if (profileIds.has(sellerId)) continue;
+    const profiles = (profilesResult.data as SellerProfile[]) ?? [];
+    const data: SellerProfileWithCount[] = profiles.map((profile) => ({
+      ...profile,
+      product_count: counts.get(profile.clerk_user_id) ?? 0,
+      has_profile: true,
+      latest_contact_number: latestContact.get(profile.clerk_user_id) ?? null,
+    }));
 
-    data.push({
-      id: `missing-${sellerId}`,
-      clerk_user_id: sellerId,
-      full_name: "Profile Pending",
-      phone_number: latestContact.get(sellerId) ?? "Not provided",
-      address: "Seller has not completed onboarding yet.",
-      government_id_type: "Pending",
-      government_id_number: "Pending",
-      profile_photo_url: null,
-      government_id_url: null,
-      role: "seller",
-      verification_status: "pending",
-      is_blocked: false,
-      blocked_reason: null,
-      blocked_at: null,
-      blocked_by_admin_id: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      product_count: count,
-      has_profile: false,
-      latest_contact_number: latestContact.get(sellerId) ?? null,
-    });
-  }
+    const profileIds = new Set(profiles.map((profile) => profile.clerk_user_id));
+    for (const [sellerId, count] of counts.entries()) {
+      if (profileIds.has(sellerId)) continue;
 
-  return {
-    data,
-    error: productsResult.error?.message ?? null,
-  };
-}
-
-export async function createSellerProfilePlaceholder(clerkUserId: string, fallbackPhone?: string | null) {
-  const { data, error } = await supabase
-    .from("seller_profiles")
-    .upsert(
-      {
-        clerk_user_id: clerkUserId,
-        full_name: `Seller ${clerkUserId.slice(0, 8)}`,
-        phone_number: fallbackPhone?.trim() || "Not provided",
-        address: "Pending seller address.",
+      data.push({
+        id: `missing-${sellerId}`,
+        clerk_user_id: sellerId,
+        full_name: "Profile Pending",
+        phone_number: latestContact.get(sellerId) ?? "Not provided",
+        address: "Seller has not completed onboarding yet.",
         government_id_type: "Pending",
         government_id_number: "Pending",
+        profile_photo_url: null,
+        government_id_url: null,
         role: "seller",
         verification_status: "pending",
         is_blocked: false,
-      },
-      { onConflict: "clerk_user_id" },
-    )
-    .select("*")
-    .single();
+        blocked_reason: null,
+        blocked_at: null,
+        blocked_by_admin_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        product_count: count,
+        has_profile: false,
+        latest_contact_number: latestContact.get(sellerId) ?? null,
+      });
+    }
 
-  if (error) {
-    return { data: null, error: error.message };
+    return {
+      data,
+      error: productsResult.error?.message ?? null,
+    };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
   }
+}
 
-  return { data: data as SellerProfile, error: null };
+export async function createSellerProfilePlaceholder(clerkUserId: string, fallbackPhone?: string | null) {
+  try {
+    const { data, error } = await supabase
+      .from("seller_profiles")
+      .upsert(
+        {
+          clerk_user_id: clerkUserId,
+          full_name: `Seller ${clerkUserId.slice(0, 8)}`,
+          phone_number: fallbackPhone?.trim() || "Not provided",
+          address: "Pending seller address.",
+          government_id_type: "Pending",
+          government_id_number: "Pending",
+          role: "seller",
+          verification_status: "pending",
+          is_blocked: false,
+        },
+        { onConflict: "clerk_user_id" },
+      )
+      .select("*")
+      .single();
+
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as SellerProfile, error: null };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
+  }
 }
 
 export async function blockSellerProfile(
@@ -249,32 +273,36 @@ export async function blockSellerProfile(
   blocked: boolean,
   blockedReason?: string,
 ) {
-  const patch = blocked
-    ? {
-        is_blocked: true,
-        blocked_reason: blockedReason?.trim() || "Blocked by admin.",
-        blocked_at: new Date().toISOString(),
-        blocked_by_admin_id: blockedByAdminId,
-      }
-    : {
-        is_blocked: false,
-        blocked_reason: null,
-        blocked_at: null,
-        blocked_by_admin_id: null,
-      };
+  try {
+    const patch = blocked
+      ? {
+          is_blocked: true,
+          blocked_reason: blockedReason?.trim() || "Blocked by admin.",
+          blocked_at: new Date().toISOString(),
+          blocked_by_admin_id: blockedByAdminId,
+        }
+      : {
+          is_blocked: false,
+          blocked_reason: null,
+          blocked_at: null,
+          blocked_by_admin_id: null,
+        };
 
-  const { data, error } = await supabase
-    .from("seller_profiles")
-    .update(patch)
-    .eq("id", sellerProfileId)
-    .select("*")
-    .single();
+    const { data, error } = await supabase
+      .from("seller_profiles")
+      .update(patch)
+      .eq("id", sellerProfileId)
+      .select("*")
+      .single();
 
-  if (error) {
-    return { data: null, error: error.message };
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as SellerProfile, error: null };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
   }
-
-  return { data: data as SellerProfile, error: null };
 }
 
 export async function promoteSellerProfileToAdmin(
@@ -282,47 +310,55 @@ export async function promoteSellerProfileToAdmin(
   clerkUserId: string,
   promotedByAdminId: string,
 ) {
-  const profileUpdate = await supabase
-    .from("seller_profiles")
-    .update({ role: "admin", verification_status: "verified" })
-    .eq("id", sellerProfileId)
-    .select("*")
-    .single();
+  try {
+    const profileUpdate = await supabase
+      .from("seller_profiles")
+      .update({ role: "admin", verification_status: "verified" })
+      .eq("id", sellerProfileId)
+      .select("*")
+      .single();
 
-  if (profileUpdate.error) {
-    return { data: null, error: profileUpdate.error.message };
+    if (profileUpdate.error) {
+      return { data: null, error: profileUpdate.error.message };
+    }
+
+    const adminInsert = await supabase.from("admins").upsert(
+      {
+        clerk_user_id: clerkUserId,
+        seller_profile_id: sellerProfileId,
+        promoted_by_admin_id: promotedByAdminId,
+      },
+      { onConflict: "clerk_user_id" },
+    );
+
+    if (adminInsert.error) {
+      return { data: null, error: adminInsert.error.message };
+    }
+
+    return { data: profileUpdate.data as SellerProfile, error: null };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
   }
-
-  const adminInsert = await supabase.from("admins").upsert(
-    {
-      clerk_user_id: clerkUserId,
-      seller_profile_id: sellerProfileId,
-      promoted_by_admin_id: promotedByAdminId,
-    },
-    { onConflict: "clerk_user_id" },
-  );
-
-  if (adminInsert.error) {
-    return { data: null, error: adminInsert.error.message };
-  }
-
-  return { data: profileUpdate.data as SellerProfile, error: null };
 }
 
 export async function updateSellerVerificationStatus(
   sellerProfileId: string,
   status: SellerVerificationStatus,
 ) {
-  const { data, error } = await supabase
-    .from("seller_profiles")
-    .update({ verification_status: status })
-    .eq("id", sellerProfileId)
-    .select("*")
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("seller_profiles")
+      .update({ verification_status: status })
+      .eq("id", sellerProfileId)
+      .select("*")
+      .single();
 
-  if (error) {
-    return { data: null, error: error.message };
+    if (error) {
+      return { data: null, error: error.message };
+    }
+
+    return { data: data as SellerProfile, error: null };
+  } catch (error) {
+    return { data: null, error: toErrorMessage(error) };
   }
-
-  return { data: data as SellerProfile, error: null };
 }
