@@ -1,7 +1,10 @@
 import { supabase } from "@/lib/supabase";
 
 export type SellerVerificationStatus = "pending" | "verified" | "rejected";
-export const ADMIN_EMAIL_ALLOWLIST = ["aarushdineshyadav@gmail.com"];
+export const ADMIN_EMAIL_ALLOWLIST = [
+  "aarushdineshyadav@gmail.com",
+  "arpit.rai@ustu.edu.in",
+];
 
 export function isAllowedAdminEmail(email?: string | null) {
   const normalizedEmail = email?.trim().toLowerCase();
